@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>分贝检测 - Decibel Meter</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        :root {
+            --primary: #5e51e3;
+            --primary-dark: #4a3fc7;
+            --primary-light: #f0eeff;
+            --text-dark: #1e1e3f;
+            --text-body: #5a5a7a;
+            --text-light: #8a8aaa;
+            --bg-light: #f8f9fe;
+            --white: #ffffff;
+            --shadow: 0 10px 40px rgba(94, 81, 227, 0.08);
+            --shadow-lg: 0 20px 60px rgba(94, 81, 227, 0.12);
+            --radius: 12px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Microsoft YaHei", sans-serif;
+            color: var(--text-body);
+            background: var(--white);
+            overflow-x: hidden;
+        }
+
+        /* ========== Navbar ========== */
+        .navbar {
+            position: fixed; top: 0; left: 0; right: 0;
+            z-index: 100;
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(0,0,0,0.06);
+            transition: box-shadow 0.3s;
+        }
+        .navbar.scrolled { box-shadow: 0 2px 20px rgba(0,0,0,0.08); }
+        .navbar-inner {
+            max-width: 1200px; margin: 0 auto;
+            padding: 0 24px; height: 72px;
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .navbar-brand {
+            font-size: 1.4rem; font-weight: 700;
+            color: var(--text-dark); text-decoration: none;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .navbar-brand i { color: var(--primary); }
+        .navbar-links {
+            display: flex; align-items: center; gap: 32px; list-style: none;
+        }
+        .navbar-links a {
+            text-decoration: none; color: var(--text-body);
+            font-size: 0.95rem; font-weight: 500;
+            transition: color 0.2s;
+        }
+        .navbar-links a:hover { color: var(--primary); }
+        .btn-nav {
+            display: inline-flex; align-items: center; gap: 6px;
+            background: var(--primary); color: #fff !important;
+            padding: 10px 24px; border-radius: 8px;
+            font-weight: 600 !important;
+            transition: background 0.2s, transform 0.2s;
+        }
+        .btn-nav:hover { background: var(--primary-dark); transform: translateY(-1px); }
+        .mobile-toggle {
+            display: none; background: none; border: none;
+            font-size: 1.4rem; color: var(--text-dark); cursor: pointer;
+        }
+
+        /* ========== Hero ========== */
+        .hero {
+            padding: 140px 24px 80px;
+            background: linear-gradient(170deg, #f8f9fe 0%, #eef0ff 40%, #fff 100%);
+            position: relative; overflow: hidden;
+        }
+        .hero::before {
+            content: ''; position: absolute;
+            top: -200px; right: -200px;
+            width: 600px; height: 600px;
+            background: radial-gradient(circle, rgba(94,81,227,0.06) 0%, transparent 70%);
+            border-radius: 50%;
+        }
+        .hero-inner {
+            max-width: 1200px; margin: 0 auto;
+            display: flex; align-items: center; gap: 60px;
+        }
+        .hero-content { flex: 1; }
+        .hero-badge {
+            display: inline-flex; align-items: center; gap: 6px;
+            background: var(--primary-light); color: var(--primary);
+            padding: 6px 16px; border-radius: 20px;
+            font-size: 0.85rem; font-weight: 600;
+            margin-bottom: 20px;
+        }
+        .hero-content h1 {
+            font-size: 3.2rem; font-weight: 800;
+            color: var(--text-dark); line-height: 1.15;
+            margin-bottom: 20px;
+        }
+        .hero-content h1 span { color: var(--primary); }
+        .hero-content p {
+            font-size: 1.15rem; line-height: 1.8;
+            color: var(--text-body); margin-bottom: 36px;
+            max-width: 480px;
+        }
+        .hero-actions { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; }
+        .btn-primary {
+            display: inline-flex; align-items: center; gap: 8px;
+            background: var(--primary); color: #fff;
+            padding: 14px 32px; border-radius: 8px;
+            text-decoration: none; font-weight: 600; font-size: 1rem;
+            border: none; cursor: pointer;
+            transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
+        }
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(94,81,227,0.3);
+        }
+        .btn-outline {
+            display: inline-flex; align-items: center; gap: 8px;
+            background: transparent; color: var(--text-dark);
+            padding: 14px 32px; border-radius: 8px;
+            text-decoration: none; font-weight: 600; font-size: 1rem;
+            border: 2px solid #e0e0f0; cursor: pointer;
+            transition: border-color 0.2s, color 0.2s;
+        }
+        .btn-outline:hover { border-color: var(--primary); color: var(--primary); }
+        .hero-stats {
+            display: flex; gap: 40px; margin-top: 48px;
+            padding-top: 32px; border-top: 1px solid #e8e8f0;
+        }
+        .hero-stats .stat-num {
+            font-size: 1.6rem; font-weight: 800;
+            color: var(--text-dark);
+        }
+        .hero-stats .stat-label { font-size: 0.85rem; color: var(--text-light); margin-top: 2px; }
+        .hero-image { flex: 1; text-align: center; }
+        .hero-image img {
+            max-width: 100%; max-height: 560px;
+            border-radius: 24px;
+            box-shadow: var(--shadow-lg);
+            animation: float 6s ease-in-out infinite;
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-12px); }
+        }
+
+        /* ========== Features ========== */
+        .section {
+            padding: 100px 24px;
+        }
+        .section-bg { background: var(--bg-light); }
+        .section-inner {
+            max-width: 1200px; margin: 0 auto;
+        }
+        .section-header { text-align: center; margin-bottom: 60px; }
+        .section-label {
+            display: inline-block; color: var(--primary);
+            font-size: 0.9rem; font-weight: 700;
+            text-transform: uppercase; letter-spacing: 1px;
+            margin-bottom: 12px;
+        }
+        .section-header h2 {
+            font-size: 2.2rem; font-weight: 800;
+            color: var(--text-dark); margin-bottom: 16px;
+        }
+        .section-header p {
+            font-size: 1.05rem; color: var(--text-light);
+            max-width: 600px; margin: 0 auto; line-height: 1.7;
+        }
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 30px;
+        }
+        .feature-card {
+            background: var(--white);
+            border-radius: var(--radius);
+            padding: 36px 28px;
+            box-shadow: var(--shadow);
+            transition: transform 0.3s, box-shadow 0.3s;
+            border: 1px solid rgba(0,0,0,0.04);
+        }
+        .feature-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 16px 48px rgba(94,81,227,0.12);
+        }
+        .feature-icon {
+            width: 56px; height: 56px;
+            background: var(--primary-light);
+            border-radius: 14px;
+            display: flex; align-items: center; justify-content: center;
+            margin-bottom: 20px;
+        }
+        .feature-icon i { font-size: 1.3rem; color: var(--primary); }
+        .feature-card h3 {
+            font-size: 1.15rem; font-weight: 700;
+            color: var(--text-dark); margin-bottom: 10px;
+        }
+        .feature-card p {
+            font-size: 0.92rem; color: var(--text-light); line-height: 1.7;
+        }
+
+        /* ========== Screenshot Carousel ========== */
+        .carousel-section { padding: 100px 0; background: var(--bg-light); }
+        .carousel-inner {
+            max-width: 450px; margin: 0 auto;
+            position: relative;
+        }
+        .carousel-viewport {
+            overflow: hidden;
+            border-radius: 20px;
+            box-shadow: var(--shadow-lg);
+        }
+        .carousel-track {
+            display: flex;
+            transition: transform 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+        .carousel-slide {
+            flex: 0 0 100%;
+            position: relative;
+        }
+        .carousel-slide img {
+            width: 100%; display: block;
+            border-radius: 20px;
+        }
+        .carousel-slide-label {
+            position: absolute; bottom: 20px; left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(8px);
+            color: #fff; padding: 8px 24px;
+            border-radius: 20px; font-size: 0.9rem;
+            font-weight: 500; white-space: nowrap;
+        }
+        .carousel-btn {
+            position: absolute; top: 50%; transform: translateY(-50%);
+            width: 48px; height: 48px; border-radius: 50%;
+            border: none; cursor: pointer; z-index: 2;
+            display: flex; align-items: center; justify-content: center;
+            background: var(--white);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+            color: var(--text-dark);
+            font-size: 1rem;
+            transition: background 0.2s, box-shadow 0.2s, transform 0.2s;
+        }
+        .carousel-btn:hover {
+            background: var(--primary); color: #fff;
+            box-shadow: 0 4px 20px rgba(94,81,227,0.3);
+        }
+        .carousel-btn.prev { left: -24px; }
+        .carousel-btn.next { right: -24px; }
+        .carousel-dots {
+            display: flex; justify-content: center;
+            gap: 10px; margin-top: 28px;
+        }
+        .carousel-dots .dot {
+            width: 10px; height: 10px; border-radius: 50%;
+            background: #d0d0e0; border: none; cursor: pointer;
+            transition: all 0.3s;
+        }
+        .carousel-dots .dot.active {
+            background: var(--primary);
+            width: 28px; border-radius: 5px;
+        }
+
+        /* ========== How It Works ========== */
+        .steps-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 30px;
+        }
+        .step-card { text-align: center; position: relative; }
+        .step-number {
+            width: 48px; height: 48px;
+            background: var(--primary); color: #fff;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.1rem; font-weight: 700;
+            margin: 0 auto 20px;
+        }
+        .step-card h3 {
+            font-size: 1.05rem; font-weight: 700;
+            color: var(--text-dark); margin-bottom: 8px;
+        }
+        .step-card p {
+            font-size: 0.88rem; color: var(--text-light); line-height: 1.6;
+        }
+
+        /* ========== CTA ========== */
+        .cta {
+            padding: 100px 24px;
+            background: linear-gradient(135deg, #5e51e3 0%, #7c3aed 100%);
+            text-align: center; color: #fff;
+        }
+        .cta h2 {
+            font-size: 2.2rem; font-weight: 800; margin-bottom: 16px;
+        }
+        .cta p {
+            font-size: 1.1rem; opacity: 0.85; margin-bottom: 36px;
+            max-width: 500px; margin-left: auto; margin-right: auto;
+        }
+        .btn-white {
+            display: inline-flex; align-items: center; gap: 8px;
+            background: #fff; color: var(--primary);
+            padding: 16px 40px; border-radius: 8px;
+            text-decoration: none; font-weight: 700; font-size: 1.05rem;
+            border: none; cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .btn-white:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+        }
+
+        /* ========== Footer ========== */
+        .footer {
+            padding: 60px 24px 30px;
+            background: var(--text-dark);
+            color: rgba(255,255,255,0.5);
+        }
+        .footer-inner {
+            max-width: 1200px; margin: 0 auto;
+            display: flex; align-items: center; justify-content: space-between;
+            flex-wrap: wrap; gap: 20px;
+        }
+        .footer-brand {
+            font-size: 1.2rem; font-weight: 700; color: #fff;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .footer-brand i { color: var(--primary); }
+        .footer-links {
+            display: flex; gap: 24px;
+        }
+        .footer-links a {
+            color: rgba(255,255,255,0.5); text-decoration: none;
+            font-size: 0.88rem; transition: color 0.2s;
+        }
+        .footer-links a:hover { color: #fff; }
+        .footer-copy {
+            width: 100%; text-align: center;
+            margin-top: 30px; padding-top: 24px;
+            border-top: 1px solid rgba(255,255,255,0.08);
+            font-size: 0.82rem;
+        }
+
+        /* ========== Responsive ========== */
+        @media (max-width: 1024px) {
+            .hero-inner { flex-direction: column; text-align: center; }
+            .hero-content p { margin-left: auto; margin-right: auto; }
+            .hero-actions { justify-content: center; }
+            .hero-stats { justify-content: center; }
+            .hero-image img { max-height: 420px; }
+            .features-grid { grid-template-columns: repeat(2, 1fr); }
+            .steps-grid { grid-template-columns: repeat(2, 1fr); }
+            .carousel-btn.prev { left: 8px; }
+            .carousel-btn.next { right: 8px; }
+        }
+        @media (max-width: 768px) {
+            .navbar-links { display: none; }
+            .mobile-toggle { display: block; }
+            .navbar-links.open {
+                display: flex; flex-direction: column;
+                position: absolute; top: 72px; left: 0; right: 0;
+                background: #fff; padding: 20px 24px;
+                border-bottom: 1px solid #eee;
+                gap: 16px;
+                box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+            }
+            .hero { padding: 120px 20px 60px; }
+            .hero-content h1 { font-size: 2.2rem; }
+            .section { padding: 60px 20px; }
+            .section-header h2 { font-size: 1.6rem; }
+            .features-grid { grid-template-columns: 1fr; }
+            .steps-grid { grid-template-columns: 1fr 1fr; gap: 20px; }
+            .cta h2 { font-size: 1.6rem; }
+            .footer-inner { flex-direction: column; text-align: center; }
+        }
+        @media (max-width: 480px) {
+            .hero-content h1 { font-size: 1.8rem; }
+            .hero-actions { flex-direction: column; align-items: stretch; }
+            .btn-primary, .btn-outline { justify-content: center; }
+            .steps-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Navbar -->
+<nav class="navbar" id="navbar">
+    <div class="navbar-inner">
+        <a href="#" class="navbar-brand">
+            <i class="fa-solid fa-wave-square"></i>
+            分贝检测
+        </a>
+        <ul class="navbar-links" id="navLinks">
+            <li><a href="#features">功能特性</a></li>
+            <li><a href="#screenshots">应用截图</a></li>
+            <li><a href="#how">使用方式</a></li>
+            <li><a href="https://android.myapp.com/myapp/detail.htm?apkName=com.yaty.audiometry" target="_blank" class="btn-nav">
+                <i class="fa-brands fa-android"></i> 免费下载
+            </a></li>
+        </ul>
+        <button class="mobile-toggle" id="mobileToggle" onclick="document.getElementById('navLinks').classList.toggle('open')">
+            <i class="fa-solid fa-bars"></i>
+        </button>
+    </div>
+</nav>
+
+<!-- Hero -->
+<section class="hero">
+    <div class="hero-inner">
+        <div class="hero-content">
+            <div class="hero-badge">
+                <i class="fa-solid fa-bolt"></i> 专业噪音检测工具
+            </div>
+            <h1>精准测量<br><span>环境噪音</span></h1>
+            <p>实时采集环境声音，计算分贝值并可视化展示。支持 A/C 计权切换、分贝摄像、历史记录回放与 Excel 报告导出，所有数据本地保存，保障你的隐私安全。</p>
+            <div class="hero-actions">
+                <a href="https://android.myapp.com/myapp/detail.htm?apkName=com.yaty.audiometry" target="_blank" class="btn-primary">
+                    <i class="fa-brands fa-android"></i> 立即下载
+                </a>
+                <a href="#screenshots" class="btn-outline">
+                    <i class="fa-solid fa-play"></i> 查看演示
+                </a>
+            </div>
+            <div class="hero-stats">
+                <div>
+                    <div class="stat-num">44.1kHz</div>
+                    <div class="stat-label">采样率</div>
+                </div>
+                <div>
+                    <div class="stat-num">A / C</div>
+                    <div class="stat-label">计权模式</div>
+                </div>
+                <div>
+                    <div class="stat-num">6</div>
+                    <div class="stat-label">多语言支持</div>
+                </div>
+            </div>
+        </div>
+        <div class="hero-image">
+            <img src="image/main.png" alt="分贝检测">
+        </div>
+    </div>
+</section>
+
+<!-- Features -->
+<section class="section section-bg" id="features">
+    <div class="section-inner">
+        <div class="section-header">
+            <div class="section-label">Features</div>
+            <h2>强大功能，简单易用</h2>
+            <p>集噪音检测、分贝摄像、数据管理于一体，满足你的各种噪音测量需求</p>
+        </div>
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fa-solid fa-microphone-lines"></i></div>
+                <h3>实时噪音检测</h3>
+                <p>44100Hz 高精度采样，Goertzel 算法频带分析，支持 A/C 计权切换，提供实时仪表盘和分贝曲线图</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fa-solid fa-camera-retro"></i></div>
+                <h3>分贝摄像</h3>
+                <p>同步录制现场画面与噪音数据，将实时分贝统计叠加到视频画面上，便于回看和取证分析</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fa-solid fa-chart-line"></i></div>
+                <h3>历史记录</h3>
+                <p>本地保存所有检测数据，支持查看历史分贝曲线、播放录音和视频回放，不丢失任何一次测量</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fa-solid fa-file-excel"></i></div>
+                <h3>数据导出</h3>
+                <p>一键导出 Excel 报告，包含测量摘要和逐秒采样数据，同时支持打包分享视频和音频文件</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fa-solid fa-language"></i></div>
+                <h3>多语言支持</h3>
+                <p>支持中文、英文、繁体中文、日语、韩语、越南语六种语言，自动适配系统语言</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fa-solid fa-shield-halved"></i></div>
+                <h3>隐私安全</h3>
+                <p>所有噪音记录和视频保存在本地应用目录，不上传任何服务器，数据完全由用户掌控</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Screenshot Carousel -->
+<section class="carousel-section" id="screenshots">
+    <div style="max-width: 1200px; margin: 0 auto; padding: 0 24px;">
+        <div class="section-header">
+            <div class="section-label">Screenshots</div>
+            <h2>应用截图</h2>
+            <p>简洁直观的界面设计，让噪音测量变得轻松高效</p>
+        </div>
+    </div>
+    <div class="carousel-inner" style="padding: 0 60px;">
+        <button class="carousel-btn prev" onclick="moveCarousel(-1)"><i class="fa-solid fa-chevron-left"></i></button>
+        <button class="carousel-btn next" onclick="moveCarousel(1)"><i class="fa-solid fa-chevron-right"></i></button>
+        <div class="carousel-viewport">
+            <div class="carousel-track" id="carouselTrack">
+                <div class="carousel-slide">
+                    <img src="image/splash.png" alt="启动页">
+                    <div class="carousel-slide-label">启动页</div>
+                </div>
+                <div class="carousel-slide">
+                    <img src="image/record_list.png" alt="记录列表">
+                    <div class="carousel-slide-label">记录列表</div>
+                </div>
+                <div class="carousel-slide">
+                    <img src="image/record_detail.png" alt="记录详情">
+                    <div class="carousel-slide-label">记录详情</div>
+                </div>
+                <div class="carousel-slide">
+                    <img src="image/record_video.png" alt="视频回放">
+                    <div class="carousel-slide-label">视频回放</div>
+                </div>
+                <div class="carousel-slide">
+                    <img src="image/camera.png" alt="分贝摄像">
+                    <div class="carousel-slide-label">分贝摄像</div>
+                </div>
+                <div class="carousel-slide">
+                    <img src="image/mine.png" alt="个人中心">
+                    <div class="carousel-slide-label">个人中心</div>
+                </div>
+            </div>
+        </div>
+        <div class="carousel-dots" id="carouselDots"></div>
+    </div>
+</section>
+
+<!-- How It Works -->
+<section class="section" id="how">
+    <div class="section-inner">
+        <div class="section-header">
+            <div class="section-label">How It Works</div>
+            <h2>简单四步，开始测量</h2>
+            <p>无需复杂配置，打开即用</p>
+        </div>
+        <div class="steps-grid">
+            <div class="step-card">
+                <div class="step-number">1</div>
+                <h3>打开应用</h3>
+                <p>启动分贝检测，授权麦克风权限，即可进入检测界面</p>
+            </div>
+            <div class="step-card">
+                <div class="step-number">2</div>
+                <h3>选择模式</h3>
+                <p>根据需求切换 A 计权（环境噪音）或 C 计权（峰值测量）模式</p>
+            </div>
+            <div class="step-card">
+                <div class="step-number">3</div>
+                <h3>开始检测</h3>
+                <p>实时查看分贝仪表盘和曲线图，应用自动记录当前、平均、最大最小值</p>
+            </div>
+            <div class="step-card">
+                <div class="step-number">4</div>
+                <h3>保存分享</h3>
+                <p>停止检测后保存记录，随时查看详情、导出报告或分享给他人</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA -->
+<section class="cta">
+    <h2>开始你的噪音检测之旅</h2>
+    <p>免费下载分贝检测，精准掌握环境噪音数据</p>
+    <a href="https://android.myapp.com/myapp/detail.htm?apkName=com.yaty.audiometry" target="_blank" class="btn-white">
+        <i class="fa-brands fa-android"></i> 免费下载
+    </a>
+</section>
+
+<!-- Footer -->
+<footer class="footer">
+    <div class="footer-inner">
+        <div class="footer-brand">
+            <i class="fa-solid fa-wave-square"></i>
+            分贝检测
+        </div>
+        <div class="footer-links">
+            <a href="#features">功能特性</a>
+            <a href="#screenshots">应用截图</a>
+            <a href="#how">使用方式</a>
+            <a href="https://android.myapp.com/myapp/detail.htm?apkName=com.yaty.audiometry" target="_blank">下载</a>
+        </div>
+        <div class="footer-copy">
+            &copy; 2024 Decibel Meter. All rights reserved.
+        </div>
+    </div>
+</footer>
+
+<script>
+    // Navbar scroll effect
+    window.addEventListener('scroll', () => {
+        document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 10);
+    });
+
+    // Close mobile menu on link click
+    document.querySelectorAll('#navLinks a').forEach(link => {
+        link.addEventListener('click', () => {
+            document.getElementById('navLinks').classList.remove('open');
+        });
+    });
+
+    // Carousel
+    const track = document.getElementById('carouselTrack');
+    const dotsContainer = document.getElementById('carouselDots');
+    const slides = track.querySelectorAll('.carousel-slide');
+    let current = 0;
+    const total = slides.length;
+
+    for (let i = 0; i < total; i++) {
+        const dot = document.createElement('button');
+        dot.className = 'dot' + (i === 0 ? ' active' : '');
+        dot.addEventListener('click', () => goTo(i));
+        dotsContainer.appendChild(dot);
+    }
+    const dots = dotsContainer.querySelectorAll('.dot');
+
+    function update() {
+        track.style.transform = `translateX(-${current * 100}%)`;
+        dots.forEach((d, i) => d.classList.toggle('active', i === current));
+    }
+
+    function moveCarousel(dir) {
+        current = (current + dir + total) % total;
+        update();
+    }
+
+    function goTo(index) {
+        current = index;
+        update();
+    }
+
+    // Touch swipe
+    let startX = 0;
+    track.addEventListener('touchstart', e => { startX = e.touches[0].clientX; });
+    track.addEventListener('touchend', e => {
+        const diff = startX - e.changedTouches[0].clientX;
+        if (Math.abs(diff) > 50) moveCarousel(diff > 0 ? 1 : -1);
+    });
+
+    // Auto-play
+    let autoPlay = setInterval(() => moveCarousel(1), 4000);
+    track.addEventListener('mouseenter', () => clearInterval(autoPlay));
+    track.addEventListener('mouseleave', () => { autoPlay = setInterval(() => moveCarousel(1), 4000); });
+</script>
+
+</body>
+</html>
