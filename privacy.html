@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>隐私政策 - 分贝检测</title>
+    <style>
+        :root {
+            --primary: #5e51e3;
+            --primary-dark: #4a3fc7;
+            --primary-light: #f0eeff;
+            --text-dark: #1e1e3f;
+            --text-body: #5a5a7a;
+            --bg-light: #f8f9fe;
+            --white: #ffffff;
+            --radius: 12px;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Microsoft YaHei", sans-serif;
+            color: var(--text-body);
+            background: var(--bg-light);
+            line-height: 1.8;
+        }
+        header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 48px 24px 40px;
+            text-align: center;
+        }
+        header a {
+            display: inline-block;
+            margin-bottom: 20px;
+            color: rgba(255,255,255,0.8);
+            text-decoration: none;
+            font-size: 14px;
+        }
+        header a:hover { color: white; }
+        header h1 { font-size: 32px; font-weight: 700; margin-bottom: 8px; }
+        header p { font-size: 14px; opacity: 0.8; }
+        main {
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 0 24px 60px;
+        }
+        .card {
+            background: var(--white);
+            border-radius: var(--radius);
+            padding: 32px;
+            margin-bottom: 24px;
+            box-shadow: 0 4px 20px rgba(94,81,227,0.07);
+        }
+        h2 {
+            color: var(--primary);
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--primary-light);
+        }
+        p { margin-bottom: 12px; color: var(--text-body); }
+        ul { padding-left: 20px; margin-bottom: 12px; }
+        li { margin-bottom: 8px; }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 12px;
+            font-size: 14px;
+        }
+        th {
+            background: var(--primary-light);
+            color: var(--primary-dark);
+            padding: 10px 14px;
+            text-align: left;
+            font-weight: 600;
+        }
+        td { padding: 10px 14px; border-bottom: 1px solid #f0f0f8; }
+        tr:last-child td { border-bottom: none; }
+        .highlight {
+            background: var(--primary-light);
+            border-left: 4px solid var(--primary);
+            padding: 14px 18px;
+            border-radius: 0 8px 8px 0;
+            margin: 12px 0;
+            color: var(--text-dark);
+            font-size: 14px;
+        }
+        footer {
+            text-align: center;
+            padding: 24px;
+            color: #aaa;
+            font-size: 13px;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <a href="index.html">← 返回首页</a>
+    <h1>隐私政策</h1>
+    <p>最后更新：2026年6月28日</p>
+</header>
+
+<main>
+
+    <div class="card">
+        <h2>概述</h2>
+        <p>感谢您使用<strong>分贝检测</strong>（SoundMeter）。本隐私政策说明了我们在您使用本应用时如何收集、使用及保护您的数据。</p>
+        <div class="highlight">我们重视您的隐私。本应用的所有噪音检测数据及录像均仅存储在您的本地设备上，不会上传至任何服务器。</div>
+    </div>
+
+    <div class="card">
+        <h2>所需权限及用途</h2>
+        <table>
+            <tr>
+                <th>权限</th>
+                <th>用途</th>
+            </tr>
+            <tr>
+                <td>麦克风（RECORD_AUDIO）</td>
+                <td>实时采集环境声音，进行分贝检测与分析</td>
+            </tr>
+            <tr>
+                <td>摄像头（CAMERA）</td>
+                <td>分贝摄像功能：录制同步叠加实时声级数据的视频</td>
+            </tr>
+            <tr>
+                <td>读取外部存储</td>
+                <td>读取已保存的噪音记录和视频文件</td>
+            </tr>
+            <tr>
+                <td>写入外部存储</td>
+                <td>将检测记录和视频保存至本地设备</td>
+            </tr>
+            <tr>
+                <td>网络访问（INTERNET）</td>
+                <td>Google 账号登录、广告展示及会员购买</td>
+            </tr>
+            <tr>
+                <td>网络状态（ACCESS_NETWORK_STATE）</td>
+                <td>检测网络连接以决定功能可用性</td>
+            </tr>
+            <tr>
+                <td>广告 ID（AD_ID）</td>
+                <td>Google 广告个性化及效果统计（可在系统设置中关闭）</td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="card">
+        <h2>数据收集与存储</h2>
+        <p><strong>本地存储数据（不上传）：</strong></p>
+        <ul>
+            <li>噪音检测记录（分贝值、时间、地点备注）</li>
+            <li>分贝摄像录制的视频文件</li>
+            <li>导出的 Excel 报告</li>
+        </ul>
+        <p><strong>不收集以下数据：</strong></p>
+        <ul>
+            <li>音频原始录音不会被保存或上传</li>
+            <li>不收集设备唯一标识符（除广告 ID）</li>
+            <li>不收集位置信息</li>
+        </ul>
+    </div>
+
+    <div class="card">
+        <h2>第三方服务</h2>
+        <p>本应用集成以下第三方服务，其数据处理遵循各自隐私政策：</p>
+        <ul>
+            <li><strong>Google Firebase 认证</strong>：用于 Google 账号登录，处理账户信息</li>
+            <li><strong>Google Play Billing</strong>：用于高级会员的应用内购买，处理支付信息</li>
+            <li><strong>Google 移动广告（AdMob）</strong>：用于展示广告，可能收集广告 ID 及设备信息</li>
+        </ul>
+        <p>如需了解详情，请参阅 <a href="https://policies.google.com/privacy" target="_blank" style="color:var(--primary)">Google 隐私政策</a>。</p>
+    </div>
+
+    <div class="card">
+        <h2>您的权利</h2>
+        <ul>
+            <li>您可随时在设备系统设置中撤销麦克风、摄像头、存储等权限</li>
+            <li>您可在应用内删除任意本地检测记录和视频</li>
+            <li>您可在 Google 设置中关闭广告个性化或重置广告 ID</li>
+            <li>您可删除应用以清除所有本地数据</li>
+        </ul>
+    </div>
+
+    <div class="card">
+        <h2>儿童隐私</h2>
+        <p>本应用不面向13岁以下儿童，不会有意收集儿童的个人数据。</p>
+    </div>
+
+    <div class="card">
+        <h2>政策更新</h2>
+        <p>我们可能不定期更新本隐私政策。若发生重大变更，将通过应用内通知告知。继续使用本应用即表示您接受更新后的政策。</p>
+    </div>
+
+    <div class="card">
+        <h2>联系我们</h2>
+        <p>如对本隐私政策有任何疑问，请通过以下方式联系我们：</p>
+        <p><strong>应用名称：</strong>分贝检测（SoundMeter）</p>
+        <p><strong>包名：</strong>com.yaty.audiometry</p>
+    </div>
+
+</main>
+
+<footer>
+    <p>© 2026 分贝检测. All rights reserved.</p>
+</footer>
+
+</body>
+</html>
